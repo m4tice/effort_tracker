@@ -159,8 +159,8 @@ class Database:
     def __init__(self) -> None:
 
         # connecting to database
-        self.database_name = 'example.db'
-        self.connection = sqlite3.connect('example.db')
+        self.database_name = 'task_db.db'
+        self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
 
         # Table : tasks
