@@ -231,7 +231,7 @@ class Database:
 
     def select_all_names(self):
         """
-        To be completed
+        Query: Select all entries' names
         """
         query =  f"SELECT task_name FROM {self.table_name};"
         result = self.cursor_execute(query=query).fetchall()
