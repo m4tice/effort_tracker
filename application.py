@@ -55,7 +55,7 @@ class Counter:
 
     def start(self, current_effort):
         """
-        To be completed
+        Start timer
         """
 
         # try:
@@ -195,7 +195,7 @@ class Database:
 
     def select_all(self):
         """
-        Query: select all entry from table
+        Query: get all entry in database
         """
         query =  f"SELECT * FROM {self.table_name};"
         result = self.cursor_execute(query=query).fetchall()
@@ -204,7 +204,7 @@ class Database:
 
     def insert_entry(self, entry):
         """
-        To be completed
+        Query: insert entry to database
         """
         hashed_name, name, effort = entry.get_info()
         query = f"""INSERT INTO {self.table_name}(key, task_name, effort)
@@ -214,14 +214,14 @@ class Database:
 
     def delete_all(self):
         """
-        To be completed
+        Query: delete everything from database
         """
         query = f"DELETE FROM {self.table_name}"
         self.cursor_execute(query=query)
 
     def select_all_key(self):
         """
-        To be completed
+        Query: get all existing keys in database
         """
         query =  f"SELECT key FROM {self.table_name};"
         result = self.cursor_execute(query=query).fetchall()
@@ -231,7 +231,7 @@ class Database:
 
     def select_all_names(self):
         """
-        Query: Select all entries' names
+        Query: gets all entries' names
         """
         query =  f"SELECT task_name FROM {self.table_name};"
         result = self.cursor_execute(query=query).fetchall()
@@ -241,7 +241,7 @@ class Database:
 
     def select_entry_effort(self, name):
         """
-        To be completed
+        Query: get effort of a specific entry
         """
         hashed = get_hashed_entry(name)
         query = f"SELECT effort FROM {self.table_name} WHERE key = '{hashed}'"
@@ -251,7 +251,7 @@ class Database:
 
     def update_effort(self, name, effort):
         """
-        To be completed
+        Query: update effort of a specific entry
         """
         hashed = get_hashed_entry(name)
         current_effort = self.select_entry_effort(name)
@@ -262,13 +262,13 @@ class Database:
 
     def result2list(self, result):
         """
-        To be completed
+        Convert query result to list type
         """
         return tuple([item[0] for item in result])  # pylint: disable=consider-using-generator
 
     def entry_exist(self, name):
         """
-        To be completed
+        Check if an entry exists in database or not
         """
         hashed = get_hashed_entry(name)
         keys = self.select_all_key()
@@ -295,27 +295,26 @@ class Model:
 
     def set_database(self, database: Database):
         """
-        To be completed
+        Set Database
         """
         self.database = database
 
     def entry_exist(self, entry_name):
         """
-        To be completed
+        Check if entry already exists in database
         """
         return self.database.entry_exist(entry_name)
 
     def entry_empty(self, entry_name):
         """
-        To be completed
+        Check if input entry is null / empty
         """
-        empty_condition_1 = entry_name == ''
-        empty_condition_2 = entry_name == ""
-        return bool(empty_condition_1 or empty_condition_2)
+        empty_condition_1 = entry_name == ""
+        return bool(empty_condition_1)
 
     def add_entry_to_database(self, name):
         """
-        To be completed
+        Add new entry to database
         """
         entry_not_exist = not self.database.entry_exist(name)
         entry_name_not_empty = not self.entry_empty(name)
@@ -340,19 +339,19 @@ class Model:
 
     def update_database_effort(self, task_name, effort):
         """
-        To be completed
+        Update effort of entry in database
         """
         self.database.update_effort(task_name, effort)
 
     def get_entries_names(self):
         """
-        To be completed
+        Get all available task_names from database
         """
         return self.database.select_all_names()
 
     def get_task_effort(self, task_name):
         """
-        To be completed
+        Get effort of entry in database
         """
         return self.database.select_entry_effort(task_name)
 
@@ -427,7 +426,7 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
 
     def task_changed(self):
         """
-        handle the month changed event
+        Handle the task_name changed event
         """
         self.label_timer_var.set(self.controller.get_task_effort_display(self.task_entry_var.get()))
 
