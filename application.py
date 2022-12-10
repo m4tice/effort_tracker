@@ -43,7 +43,6 @@ class Counter:
         self.time = 1
         self.hours, self.mins, self.secs = 0, 0, 0
         self.timer = None
-        self.limit = 28800
         self.counting_state = False
 
         self.set_timer()
@@ -61,7 +60,7 @@ class Counter:
 
         try:
             while self.time >= 1 and self.counting_state is True:
-                if self.time > self.limit:
+                if self.time > 28800:
                     break
 
                 if self.time != 0:
