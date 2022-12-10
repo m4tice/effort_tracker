@@ -57,28 +57,29 @@ class Counter:
         """
         Start timer
         """
-
-        # try:
+        # Start the count
         while self.time >= 1 and self.counting_state is True:
+
+            # Break the count if effort is more than 8 hours
             if self.time > 28800:
                 break
 
+            # Main couting loop
             if self.time != 0:
                 self.hours, self.mins, self.secs = get_hms(input_time=
                 self.time + current_effort)
 
+            # Set the timer based on information of hours, minutes and seconds;
+            # and refresh the applications
             self.set_timer()
             self.controller.refresh_application(str(self.timer))
 
             time.sleep(0.1)
             self.time += 1
 
-        # except Exception as exception:
-        #     print("Exception: ", exception)
-
     def stop(self)->int:
         """
-        Stop counting
+        Stop counting and reset the count and timer states
         """
         counted_time = self.time
         self.reset_count()
@@ -159,7 +160,7 @@ class Database:
     def __init__(self) -> None:
 
         # connecting to database
-        self.database_name = 'task_db.db'
+        self.database_name = 'efforts.db'
         self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
 
@@ -167,6 +168,7 @@ class Database:
         self.table_name = 'tasks'
         self.table_initialized = self.table_exist(self.table_name)
 
+        # Check if table exists or not
         if not self.table_initialized:
             query = f"CREATE TABLE {self.table_name} (key, task_name, effort)"
             self.cursor_execute(query=query)
@@ -253,8 +255,11 @@ class Database:
         """
         Query: update effort of a specific entry
         """
+        # Get hashed info and use it to find its latest efforts
         hashed = get_hashed_entry(name)
         current_effort = self.select_entry_effort(name)
+
+        # Update the latest effort information to database
         current_effort += effort
         query = f"UPDATE {self.table_name} SET effort = '{current_effort}' WHERE key = '{hashed}';"
         self.cursor_execute(query=query)
@@ -277,7 +282,9 @@ class Database:
 
 
 class Model:
-    """Model Class"""
+    """
+    Model Class
+    """
     def __init__(self) -> None:
         self.data_length = 0
         self.last_id = None
@@ -316,15 +323,22 @@ class Model:
         """
         Add new entry to database
         """
+        # Conditions for a valid entry insertation
         entry_not_exist = not self.database.entry_exist(name)
         entry_name_not_empty = not self.entry_empty(name)
 
+        # Check if entry is valid based on previous conditions
         if entry_not_exist and entry_name_not_empty:
             entry = Entry(name=name)
             self.database.insert_entry(entry=entry)
+
+            # Update task_entry combobox with newly added query
+            self.controller.update_task_entry_combobox()
+
             msg = "New entry has been added."
             title = message_box_title[2]
 
+        # Display error messages in case entry is invalid
         else:
             if not entry_name_not_empty:
                 msg = "Cannot add entry. Entry cannot be left empty!"
@@ -334,8 +348,7 @@ class Model:
 
             title = message_box_title[0]
 
-        self.controller.display_message(title=title, message=msg)
-        self.controller.update_task_entry_combobox()
+        self.controller.display_message(title=title, message=msg)  # Display message
 
     def update_database_effort(self, task_name, effort):
         """
@@ -357,7 +370,9 @@ class Model:
 
 
 class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-attributes
-    """View Class"""
+    """
+    View Class
+    """
     def __init__(self, parent_application):
         super().__init__(parent_application)
 
@@ -424,7 +439,7 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         if self.controller:
             self.controller.add(self.task_entry_var.get())
 
-    def task_changed(self):
+    def task_changed(self, event):  # pylint: disable=unused-argument
         """
         Handle the task_name changed event
         """
@@ -457,22 +472,27 @@ class Controller:
         """
         Counting time method
         """
+        # Conditions for checking if selected entry is valid to start timer
         entry_exist = self.model.entry_exist(task_name)
         entry_name_not_empty = not self.model.entry_empty(task_name)
 
+        # If entry is valid
         if entry_exist and entry_name_not_empty:
 
+            # Start timer if it is not in couting state
             if self.counter.get_counting_state() is False:
                 self.view.button_count_var.set("Stop")
                 self.counter.set_counting_state(True)
                 current_effort = self.get_task_effort(task_name)
                 self.counter.start(current_effort=current_effort)
 
+            # Stop timer if it is countings
             else:
                 effort = self.counter.stop()
                 self.view.button_count_var.set("Start")
                 self.model.update_database_effort(task_name, effort)
 
+        # Display error message box if entry is invalid
         else:
 
             if not entry_name_not_empty:
