@@ -31,7 +31,7 @@ def render2clock(hours, minutes, seconds):
     """
     Create clock display
     """
-    return '{:04d}:{:02d}:{:02d}'.format(hours, minutes, seconds)
+    return '{:04d}:{:02d}:{:02d}'.format(hours, minutes, seconds)  # pylint: disable=consider-using-f-string
 
 
 class Counter:
@@ -311,7 +311,7 @@ class Model:
         """
         empty_condition_1 = entry_name == ''
         empty_condition_2 = entry_name == ""
-        return True if empty_condition_1 or empty_condition_2 else False
+        return bool(empty_condition_1 or empty_condition_2)
 
     def add_entry_to_database(self, name):
         """
