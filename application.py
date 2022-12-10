@@ -58,23 +58,23 @@ class Counter:
         To be completed
         """
 
-        try:
-            while self.time >= 1 and self.counting_state is True:
-                if self.time > 28800:
-                    break
+        # try:
+        while self.time >= 1 and self.counting_state is True:
+            if self.time > 28800:
+                break
 
-                if self.time != 0:
-                    self.hours, self.mins, self.secs = get_hms(input_time=
-                    self.time + current_effort)
+            if self.time != 0:
+                self.hours, self.mins, self.secs = get_hms(input_time=
+                self.time + current_effort)
 
-                self.set_timer()
-                self.controller.refresh_application(str(self.timer))
+            self.set_timer()
+            self.controller.refresh_application(str(self.timer))
 
-                time.sleep(0.1)
-                self.time += 1
+            time.sleep(0.1)
+            self.time += 1
 
-        except Exception as exception:
-            print("Exception: ", exception)
+        # except Exception as exception:
+        #     print("Exception: ", exception)
 
     def stop(self)->int:
         """
@@ -191,7 +191,7 @@ class Database:
         query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';"
         list_of_tables = self.cursor.execute(query).fetchall()
 
-        return True if len(list_of_tables) > 0 else False
+        return bool(len(list_of_tables) > 0)
 
     def select_all(self):
         """
@@ -264,7 +264,7 @@ class Database:
         """
         To be completed
         """
-        return tuple([item[0] for item in result])
+        return tuple([item[0] for item in result])  # pylint: disable=consider-using-generator
 
     def entry_exist(self, name):
         """
@@ -357,7 +357,7 @@ class Model:
         return self.database.select_entry_effort(task_name)
 
 
-class View(ttk.Frame):
+class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-attributes
     """View Class"""
     def __init__(self, parent_application):
         super().__init__(parent_application)
