@@ -12,10 +12,11 @@ message_box_title = ('Error', 'Warning', 'Info')
 
 def get_hashed_entry(input_string):
     """
-    Get hashed form
+    Get hashed form from lower case non-whitespace input string
     """
     non_whitespace_input_string = input_string.replace(" ", "")
     lowercase_input_string = non_whitespace_input_string.lower()
+
     return hashlib.sha256(lowercase_input_string.encode('utf-8')).hexdigest()
 
 
