@@ -14,7 +14,9 @@ def get_hashed_entry(input_string):
     """
     Get hashed form
     """
-    return hashlib.sha256(input_string.encode('utf-8')).hexdigest()
+    non_whitespace_input_string = input_string.replace(" ", "")
+    lowercase_input_string = non_whitespace_input_string.lower()
+    return hashlib.sha256(lowercase_input_string.encode('utf-8')).hexdigest()
 
 
 def get_hms(input_time):
