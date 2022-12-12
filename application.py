@@ -37,6 +37,13 @@ def render2clock(hours, minutes, seconds):
     return '{:04d}:{:02d}:{:02d}'.format(hours, minutes, seconds)  # pylint: disable=consider-using-f-string
 
 
+def print_info(msg: str):
+    """
+    print message under INFO type
+    """
+    print(f"[INFO]: {msg}")
+
+
 class Counter:
     """
     Counter Class
@@ -410,6 +417,10 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         self.button_add = ttk.Button(self, text="Add", command=self.button_add_clicked)
         self.button_add.grid(row=2, column=1, padx=10)
 
+        self.current_task = None
+        self.previous_task = None
+        self.first_add_or_change = (self.current_task is None and self.previous_task is None)
+
     def set_controller(self, controller):
         """
         Set controller for View class
@@ -433,20 +444,56 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         Action when Button Count is clicked
         """
         if self.controller:
-            self.controller.count(self.get_combobox_current_item())
+            self.controller.count(self.current_task)
 
     def button_add_clicked(self):
         """
         Action when Button Add is clicked
         """
         if self.controller:
-            self.controller.add(self.task_entry_var.get())
+            # Once a new task is added and selected by default,
+            # the timer will stop and the effort needs to be saved into previous task
+            if self.first_add_or_change:
+                self.current_task = self.task_entry_var.get()
+                self.first_add_or_change = False
+
+            else:
+                self.previous_task, self.current_task = self.current_task, self.task_entry_var.get()
+
+            # print_info(f" On add button clicked:: {self.previous_task}, {self.current_task}")
+
+            condition_for_stopping_count_1 = self.controller.get_count_state()
+            condition_for_stopping_count_2 = self.current_task != self.previous_task
+            if condition_for_stopping_count_1 and condition_for_stopping_count_2:
+                self.controller.stop_count(self.previous_task)
+
+            self.controller.add(self.current_task)
+            self.label_timer_var.set(self.controller.get_task_effort_display(self.current_task))
 
     def task_changed(self, event):  # pylint: disable=unused-argument
         """
         Handle the task_name changed event
         """
-        self.label_timer_var.set(self.controller.get_task_effort_display(self.task_entry_var.get()))
+        if self.controller:
+            # Once a new task is selected,
+            # the timer will stop and the effort needs to be saved into previous task
+            if self.first_add_or_change:
+                self.current_task = self.task_entry_var.get()
+                self.first_add_or_change = False
+
+            else:
+                self.previous_task, self.current_task = self.current_task, self.task_entry_var.get()
+
+            # print_info(f" On task_changed:: {self.previous_task}, {self.current_task}")
+
+            # Count will be stopped only when it is in counting state (TRUE)
+            # and a task that is different from the active is selected
+            condition_for_stopping_count_1 = self.controller.get_count_state()
+            condition_for_stopping_count_2 = self.current_task != self.previous_task
+            if condition_for_stopping_count_1 and condition_for_stopping_count_2:
+                self.controller.stop_count(self.previous_task)
+
+            self.label_timer_var.set(self.controller.get_task_effort_display(self.current_task))
 
     def display_message(self, title, message):
         """
@@ -491,9 +538,7 @@ class Controller:
 
             # Stop timer if it is countings
             else:
-                effort = self.counter.stop()
-                self.view.button_count_var.set("Start")
-                self.model.update_database_effort(task_name, effort)
+                self.stop_count(task_name=task_name)
 
         # Display error message box if entry is invalid
         else:
@@ -509,6 +554,20 @@ class Controller:
 
             title = message_box_title[0]
             self.display_message(title=title, message=msg)
+
+    def stop_count(self, task_name):
+        """
+        Stop timer if it is countings
+        """
+        effort = self.counter.stop()
+        self.view.button_count_var.set("Start")
+        self.model.update_database_effort(task_name, effort)
+
+    def get_count_state(self):
+        """
+        Get counter state
+        """
+        return self.counter.get_counting_state()
 
     def add(self, name):
         """
