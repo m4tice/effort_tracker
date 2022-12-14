@@ -1,11 +1,13 @@
 """Version: EF_2.0.1"""
 
+import os
 import time
 import sqlite3
 import hashlib
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
+from datetime import datetime
 
 
 message_box_title = ('Error', 'Warning', 'Info')
@@ -41,7 +43,16 @@ def print_info(msg: str):
     """
     print message under INFO type
     """
-    print(f"[INFO]: {msg}")
+    msg = f"[INFO]: {msg}"
+    print(msg)
+
+    return msg
+
+def log_msg(msg: str):
+    """
+    create message for log
+    """
+    return f"[INFO]: {msg}"
 
 
 class Counter:
@@ -508,6 +519,45 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         self.parent_application.update()
 
 
+class Logger:
+    """
+    Logger Class
+    """
+    def __init__(self) -> None:
+        self.log_path = "./data"
+        self.msg_list = []
+        self.controller = None
+
+    def set_controller(self, controller):
+        """
+        Set controller
+        """
+        self.controller = controller
+
+    def write_log(self, msg: str):
+        """
+        Add msg to log
+        """
+        self.msg_list.append(msg)
+
+    def export_log(self):
+        """
+        Export log file
+        """
+        today_date = datetime.now()
+        log_name = f"""log_{today_date.year}-{today_date.month}-{today_date.day}_{today_date.hour}-{today_date.minute}.txt"""  # pylint: disable = line-too-long
+
+        complete_log_path = os.path.join(self.log_path, log_name)
+
+        with open(complete_log_path, "w", encoding="utf-8") as log_file:
+            for msg in self.msg_list:
+                log_file.write(msg)
+                log_file.write("\n")
+
+            log_file.write("END OF LOG.")
+            log_file.close()
+
+
 class Controller:
     """
     Controller Class
@@ -516,6 +566,7 @@ class Controller:
         self.model = model
         self.view = view
         self.counter = None
+        self.logger = None
         self.application = None
 
     def count(self, task_name):
@@ -539,6 +590,8 @@ class Controller:
             # Stop timer if it is countings
             else:
                 self.stop_count(task_name=task_name)
+                msg = print_info("Timer stopped.")
+                self.logger.write_log(msg=msg)
 
         # Display error message box if entry is invalid
         else:
@@ -613,6 +666,12 @@ class Controller:
         """
         self.counter = counter
 
+    def set_logger(self, logger: Logger):
+        """
+        set logger
+        """
+        self.logger = logger
+
     def get_task_effort(self, task_name):
         """
         Get raw effort (in terms of second) from task
@@ -633,6 +692,12 @@ class Controller:
         Display message box
         """
         self.view.display_message(title=title, message=message)
+
+    def export_log(self):
+        """
+        Call Logger to export log
+        """
+        self.logger.export_log()
 
 
 class Aplication(tk.Tk):
@@ -668,20 +733,32 @@ class Aplication(tk.Tk):
         self.counter.set_controller(self.controller)
         self.controller.set_counter(self.counter)
 
+        self.logger = Logger()
+        self.controller.set_logger(self.logger)
+
         # MVC
         self.controller.set_model(model=self.model)
         self.controller.set_view(view=self.view)
         self.controller.set_application(self)
         self.controller.update_task_entry_combobox()
 
+    def export_log(self):
+        """
+        main export log
+        """
+        self.controller.export_log()
+
 
 def main():
     """
     main function
     """
-    app = Aplication()
-    app.mainloop()
+    try:
+        app = Aplication()
+        app.mainloop()
 
+    finally:
+        app.export_log()
 
 if __name__ == "__main__":
     main()
