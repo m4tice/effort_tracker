@@ -1,2 +1,0 @@
-[INFO]: Timer stopped.
-END OF LOG.

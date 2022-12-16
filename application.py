@@ -454,14 +454,17 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         """
         Action when Button Count is clicked
         """
-        if self.controller:
+        condition_task_entry_empty = self.task_entry_var.get() == ""
+        if self.controller and not condition_task_entry_empty:
             self.controller.count(self.current_task)
+
 
     def button_add_clicked(self):
         """
         Action when Button Add is clicked
         """
-        if self.controller:
+        condition_task_entry_empty = self.task_entry_var.get() == ""
+        if self.controller and not condition_task_entry_empty:
             # Once a new task is added and selected by default,
             # the timer will stop and the effort needs to be saved into previous task
             if self.first_add_or_change:
@@ -486,6 +489,7 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         Handle the task_name changed event
         """
         if self.controller:
+
             # Once a new task is selected,
             # the timer will stop and the effort needs to be saved into previous task
             if self.first_add_or_change:
@@ -495,14 +499,15 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
             else:
                 self.previous_task, self.current_task = self.current_task, self.task_entry_var.get()
 
-            # print_info(f" On task_changed:: {self.previous_task}, {self.current_task}")
-
             # Count will be stopped only when it is in counting state (TRUE)
             # and a task that is different from the active is selected
             condition_for_stopping_count_1 = self.controller.get_count_state()
             condition_for_stopping_count_2 = self.current_task != self.previous_task
             if condition_for_stopping_count_1 and condition_for_stopping_count_2:
                 self.controller.stop_count(self.previous_task)
+
+            msg = print_info(f"Task: < {self.current_task} > is selected.")
+            self.controller.logger.write_log(msg)
 
             self.label_timer_var.set(self.controller.get_task_effort_display(self.current_task))
 
@@ -585,13 +590,15 @@ class Controller:
                 self.view.button_count_var.set("Stop")
                 self.counter.set_counting_state(True)
                 current_effort = self.get_task_effort(task_name)
+
+                msg = print_info(f"Timer started at {current_effort}")
+                self.logger.write_log(msg=msg)
+
                 self.counter.start(current_effort=current_effort)
 
             # Stop timer if it is countings
             else:
                 self.stop_count(task_name=task_name)
-                msg = print_info("Timer stopped.")
-                self.logger.write_log(msg=msg)
 
         # Display error message box if entry is invalid
         else:
@@ -616,6 +623,10 @@ class Controller:
         self.view.button_count_var.set("Start")
         self.model.update_database_effort(task_name, effort)
 
+        latest_effort = self.get_task_effort(task_name)
+        msg = print_info(f"Timer stopped at {latest_effort}")
+        self.logger.write_log(msg=msg)
+
     def get_count_state(self):
         """
         Get counter state
@@ -627,6 +638,8 @@ class Controller:
         Add entry to database by calling Model's method
         """
         self.model.add_entry_to_database(name)
+        msg = print_info(f"Task < {name} > has been added to database.")
+        self.logger.write_log(msg=msg)
 
     def update_task_entry_combobox(self):
         """
@@ -647,18 +660,25 @@ class Controller:
         Set Model
         """
         self.model = model
+        msg = print_info("Model is connected.")
+        self.logger.write_log(msg=msg)
+
 
     def set_view(self, view: View):
         """
         Set View
         """
         self.view = view
+        msg = print_info("View is connected.")
+        self.logger.write_log(msg=msg)
 
     def set_application(self, application):
         """
         Set Application
         """
         self.application = application
+        msg = print_info("Application is connected.")
+        self.logger.write_log(msg=msg)
 
     def set_counter(self, counter: Counter):
         """
