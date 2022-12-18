@@ -1,0 +1,9 @@
+1. Change Database table format
+   From "hashed | task_name | total_effort
+   To "hashed | task_name | one_time_effort | date
+
+2. Change logging function accordingly
+
+3. Export to csv
+
+4. Change GUI using customtkinters
