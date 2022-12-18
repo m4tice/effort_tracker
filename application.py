@@ -506,7 +506,7 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
             if condition_for_stopping_count_1 and condition_for_stopping_count_2:
                 self.controller.stop_count(self.previous_task)
 
-            msg = print_info(f"Task: < {self.current_task} > is selected.")
+            msg = print_info(f"Selected: {self.current_task}")
             self.controller.logger.write_log(msg)
 
             self.label_timer_var.set(self.controller.get_task_effort_display(self.current_task))
@@ -591,7 +591,12 @@ class Controller:
                 self.counter.set_counting_state(True)
                 current_effort = self.get_task_effort(task_name)
 
-                msg = print_info(f"Timer started at {current_effort}")
+                current_effort_hours, current_effort_minutes, current_effort_seconds = get_hms(current_effort)  # pylint: disable = line-too-long
+                current_effort_display = render2clock(current_effort_hours,
+                                                        current_effort_minutes,
+                                                        current_effort_seconds)
+                msg = f"Timer started at {current_effort_display}"
+                msg = print_info(msg=msg)
                 self.logger.write_log(msg=msg)
 
                 self.counter.start(current_effort=current_effort)
@@ -624,7 +629,12 @@ class Controller:
         self.model.update_database_effort(task_name, effort)
 
         latest_effort = self.get_task_effort(task_name)
-        msg = print_info(f"Timer stopped at {latest_effort}")
+        latest_effort_hours, latest_effort_minutes, latest_effort_seconds = get_hms(latest_effort)
+        latest_time_display = render2clock(latest_effort_hours,
+                                            latest_effort_minutes,
+                                            latest_effort_seconds)
+        msg = f"Timer stopped at: {latest_time_display}"
+        msg = print_info(msg)
         self.logger.write_log(msg=msg)
 
     def get_count_state(self):

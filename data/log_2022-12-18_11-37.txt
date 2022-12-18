@@ -1,0 +1,9 @@
+[INFO]: Model is connected.
+[INFO]: View is connected.
+[INFO]: Application is connected.
+[INFO]: Task: < Tuan > is selected.
+[INFO]: Timer started at 0000:01:41
+[INFO]: Timer stopped at: 0000:02:07
+[INFO]: Timer started at 0000:02:07
+[INFO]: Timer stopped at: 0000:02:21
+END OF LOG.
