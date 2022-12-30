@@ -233,7 +233,7 @@ class ExportJob:
                 date_minute)
             )
 
-        except Exception:
+        except Exception:  # pylint: disable = broad-except
             pass
 
     def export_csv(self):
