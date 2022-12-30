@@ -140,7 +140,7 @@ class Entry:
     def __init__(self) -> None:
         self.entry_hashed = None
         self.entry_name = None
-        self.effort = 5
+        self.effort = 0
         self.date = datetime.now()
 
     def set_name(self, name: str):
@@ -635,8 +635,13 @@ class Controller:
         """
         Stop timer if it is countings
         """
+        # Stop counting and get the latest count
         effort = self.counter.stop()
+
+        # Change count button label to 'Start'
         self.view.button_count_var.set("Start")
+
+        # Update to database
         self.model.update_database_effort(task_name, effort)
 
         latest_effort = self.get_task_effort(task_name)
