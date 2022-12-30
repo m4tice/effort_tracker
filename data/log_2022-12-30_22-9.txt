@@ -1,0 +1,6 @@
+[INFO]: Model is connected.
+[INFO]: View is connected.
+[INFO]: Application is connected.
+[INFO]: Task <  > has been added to database.
+[INFO]: Selected: Tuan
+END OF LOG.

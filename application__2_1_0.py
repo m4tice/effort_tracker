@@ -464,8 +464,10 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         """
         Action when Button Count is clicked
         """
-        condition_task_entry_empty = self.task_entry_var.get() == ""
-        if self.controller and not condition_task_entry_empty:
+        # Comments to be removed:
+        # condition_task_entry_empty = self.task_entry_var.get() == ""
+        # if self.controller and not condition_task_entry_empty:
+        if self.controller:
             self.controller.count(self.current_task)
 
 
@@ -473,8 +475,10 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         """
         Action when Button Add is clicked
         """
-        condition_task_entry_empty = self.task_entry_var.get() == ""
-        if self.controller and not condition_task_entry_empty:
+        # Comments to be removed:
+        # condition_task_entry_empty = self.task_entry_var.get() == ""
+        # if self.controller and not condition_task_entry_empty:
+        if self.controller:
             # Once a new task is added and selected by default,
             # the timer will stop and the effort needs to be saved into previous task
             if self.first_add_or_change:
@@ -600,7 +604,6 @@ class Controller:
                 self.view.button_count_var.set("Stop")
                 self.counter.set_counting_state(True)
                 current_effort = self.get_task_effort(task_name)
-                print(">>>", current_effort)
 
                 current_effort_hours, current_effort_minutes, current_effort_seconds = get_hms(current_effort)  # pylint: disable = line-too-long
                 current_effort_display = render2clock(current_effort_hours,
