@@ -223,9 +223,9 @@ class ExportJob:
             date_splitted = date.split(" ")
             date_ymd, date_hms = date_splitted[0], date_splitted[1]
             date_year, date_month, date_day = date_ymd.split("-")
-            date_hour, date_minute, date_second = date_hms.split(":")
+            date_hour, date_minute, _ = date_hms.split(":")
 
-            print_info("{}-{}-{}_{}:{}".format(
+            print_info("{}-{}-{}_{}:{}".format(  # pylint: disable = consider-using-f-string
                 date_year,
                 date_month,
                 date_day,
@@ -253,7 +253,7 @@ class ExportJob:
         print(csv_file_name)
 
         for entry in self.data:
-            task, effort, date = self.extract_entry_info(entry)
+            _, _, date = self.extract_entry_info(entry)
             self.extract_date_info(date)
 
 
