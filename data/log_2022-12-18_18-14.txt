@@ -1,0 +1,17 @@
+[INFO]: Model is connected.
+[INFO]: View is connected.
+[INFO]: Application is connected.
+[INFO]: Task < Tuan > has been added to database.
+[INFO]: Timer started at 0000:00:05
+[INFO]: Timer stopped at: 0000:00:17
+[INFO]: Timer started at 0000:00:17
+[INFO]: Timer stopped at: 0000:00:26
+[INFO]: Task < Tuan > has been added to database.
+[INFO]: Task < Chang > has been added to database.
+[INFO]: Selected: Tuan
+[INFO]: Timer started at 0000:00:26
+[INFO]: Timer stopped at: 0000:00:49
+[INFO]: Selected: Chang
+[INFO]: Selected: Tuan
+[INFO]: Selected: Chang
+END OF LOG.
