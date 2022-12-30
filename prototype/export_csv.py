@@ -1,6 +1,6 @@
 """Export database to .csv"""
 
-import os
+# import os
 
 import sqlite3
 import hashlib
