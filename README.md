@@ -1,4 +1,4 @@
 # effort_tracker
 
-Command to build execution file
+Command to build .exe file
 pyinstaller --onefile ./application__<version>.py
