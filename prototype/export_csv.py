@@ -62,7 +62,7 @@ def log_msg(msg: str):
     return f"[INFO]: {msg}"
 
 
-class Db2:
+class Db2Prot:
     """
     Database Class
     """
@@ -264,7 +264,7 @@ def prototype_exec():
     """
     Prototype testing method
     """
-    prototype_db = Db2()
+    prototype_db = Db2Prot()
     query_data = prototype_db.select_all()
     print(query_data)
 
