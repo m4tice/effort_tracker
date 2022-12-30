@@ -202,19 +202,3 @@ class DB2:
         keys = self.select_all_key()
 
         return hashed in keys
-
-
-def prototype():
-    """
-    Testing prototypes
-    """
-    db2 = DB2()
-
-    entry1 = Entry()
-    entry1.set_name("Chang")
-
-    entry2 = Entry()
-    entry2.set_name("Tuan")
-
-
-prototype()
