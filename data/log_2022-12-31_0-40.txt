@@ -1,0 +1,7 @@
+[INFO]: Model is connected.
+[INFO]: View is connected.
+[INFO]: Application is connected.
+[INFO]: Selected: Tuan
+[INFO]: Timer started at 0000:01:14
+[INFO]: Timer stopped at: 0000:01:29
+END OF LOG.

@@ -11,3 +11,5 @@
 [ ] 5. Extend task_entry width
 
 [ ] 6. Baseline functionality for database
+
+[ ] 7. Add columns: {year, month, day, weekday} to database
