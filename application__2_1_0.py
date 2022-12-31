@@ -12,14 +12,18 @@ from datetime import datetime
 
 message_box_title = ('Error', 'Warning', 'Info')
 
-def get_hashed_entry(input_string):
+def get_hashed_entry(input_string: str):
     """
     Get hashed form from lower case non-whitespace input string
     """
-    non_whitespace_input_string = input_string.replace(" ", "")
-    lowercase_input_string = non_whitespace_input_string.lower()
+    print("[DEBUG]: ", input_string)
+    if input_string is not None:
+        non_whitespace_input_string = input_string.replace(" ", "")
+        lowercase_input_string = non_whitespace_input_string.lower()
 
-    return hashlib.sha256(lowercase_input_string.encode('utf-8')).hexdigest()
+        return hashlib.sha256(lowercase_input_string.encode('utf-8')).hexdigest()
+
+    return None
 
 
 def get_hms(input_time):
@@ -141,7 +145,9 @@ class Entry:
         self.entry_hashed = None
         self.entry_name = None
         self.effort = 0
+
         self.date = datetime.now()
+        self.year, self.month, self.day, self.hour, self.minute, self.weekday = self.extract_date_info(date=self.date)  # pylint: disable=line-too-long
 
     def set_name(self, name: str):
         """
@@ -160,7 +166,20 @@ class Entry:
         """
         Get all information from entry
         """
-        return self.entry_hashed, self.entry_name, self.effort, self.date
+        return self.entry_hashed, self.entry_name, self.effort, self.year, self.month, self.day, self.hour, self.minute, self.weekday  # pylint: disable=line-too-long
+
+    def extract_date_info(self, date: datetime):
+        """
+        Extract date information
+        """
+        date_year = date.year
+        date_month = date.month
+        date_day = date.day
+        date_hour = date.hour
+        date_minute = date.minute
+        date_weekday = date.weekday
+
+        return date_year, date_month, date_day, date_hour, date_minute, date_weekday
 
     def get_name(self):
         """
@@ -185,7 +204,7 @@ class Db2:
         self.database_name = 'prototype.db'
         self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
-        self.columns = "(hashed, task_name, effort, date)"
+        self.columns = "(hashed, task_name, effort, year, month, day, hour, minute, weekday)"
 
         # Table : tasks
         self.table_name = 'tasks'
@@ -232,9 +251,17 @@ class Db2:
         """
         Query: insert entry to database
         """
-        hashed_name, name, effort, effort_date = entry.get_info()
+        hashed_name, name, effort, effort_year, effort_month, effort_day, effort_hour, effort_minute, effort_weekday = entry.get_info()  # pylint: disable=line-too-long
         query = f"""INSERT INTO {self.table_name}{self.columns}
-                        VALUES ('{hashed_name}', '{name}' , '{effort}', '{effort_date}');"""
+                        VALUES ('{hashed_name}',
+                        '{name}',
+                        '{effort}',
+                        '{effort_year}',
+                        '{effort_month}',
+                        '{effort_day}',
+                        '{effort_hour}',
+                        '{effort_minute}',
+                        '{effort_weekday}');"""
         self.cursor_execute(query=query)
         self.conn_commit()
 
@@ -343,7 +370,8 @@ class Model:
         Check if input entry is null / empty
         """
         empty_condition_1 = entry_name == ""
-        return bool(empty_condition_1)
+        empty_condition_2 = entry_name is None
+        return empty_condition_1 or empty_condition_2
 
     def add_entry_to_database(self, name):
         """
@@ -593,31 +621,34 @@ class Controller:
         Counting time method
         """
         # Conditions for checking if selected entry is valid to start timer
-        entry_exist = self.model.entry_exist(task_name)
         entry_name_not_empty = not self.model.entry_empty(task_name)
 
         # If entry is valid
-        if entry_exist and entry_name_not_empty:
+        if entry_name_not_empty:
 
-            # Start timer if it is not in couting state
-            if self.counter.get_counting_state() is False:
-                self.view.button_count_var.set("Stop")
-                self.counter.set_counting_state(True)
-                current_effort = self.get_task_effort(task_name)
+            entry_exist = self.model.entry_exist(task_name)
 
-                current_effort_hours, current_effort_minutes, current_effort_seconds = get_hms(current_effort)  # pylint: disable = line-too-long
-                current_effort_display = render2clock(current_effort_hours,
-                                                        current_effort_minutes,
-                                                        current_effort_seconds)
-                msg = f"Timer started at {current_effort_display}"
-                msg = print_info(msg=msg)
-                self.logger.write_log(msg=msg)
+            if entry_exist:
 
-                self.counter.start(current_effort=current_effort)
+                # Start timer if it is not in couting state
+                if self.counter.get_counting_state() is False:
+                    self.view.button_count_var.set("Stop")
+                    self.counter.set_counting_state(True)
+                    current_effort = self.get_task_effort(task_name)
 
-            # Stop timer if it is countings
-            else:
-                self.stop_count(task_name=task_name)
+                    current_effort_hours, current_effort_minutes, current_effort_seconds = get_hms(current_effort)  # pylint: disable = line-too-long
+                    current_effort_display = render2clock(current_effort_hours,
+                                                            current_effort_minutes,
+                                                            current_effort_seconds)
+                    msg = f"Timer started at {current_effort_display}"
+                    msg = print_info(msg=msg)
+                    self.logger.write_log(msg=msg)
+
+                    self.counter.start(current_effort=current_effort)
+
+                # Stop timer if it is countings
+                else:
+                    self.stop_count(task_name=task_name)
 
         # Display error message box if entry is invalid
         else:

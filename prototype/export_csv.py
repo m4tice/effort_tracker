@@ -1,9 +1,11 @@
 """Export database to .csv"""
 
-# import os
+import sys
 from datetime import datetime
 
-from application__2_1_0 import Db2, print_info
+sys.path.append('D:/TUAN/Workspace/Python/EF/EF_2.0.0')
+
+from application__2_1_0 import Db2, print_info  # pylint: disable=wrong-import-position
 
 weekdict = {
     "0": "Mon",
@@ -76,7 +78,6 @@ class ExportJob:
         for entry in self.data:
             _, _, date = self.extract_entry_info(entry)
             self.extract_date_info(date)
-
 
 ### Main Prototype section ends here
 
