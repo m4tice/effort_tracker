@@ -12,11 +12,12 @@ from datetime import datetime
 
 message_box_title = ('Error', 'Warning', 'Info')
 
+
 def get_hashed_entry(input_string: str):
     """
     Get hashed form from lower case non-whitespace input string
     """
-    print("[DEBUG]: ", input_string)
+
     if input_string is not None:
         non_whitespace_input_string = input_string.replace(" ", "")
         lowercase_input_string = non_whitespace_input_string.lower()
@@ -177,7 +178,7 @@ class Entry:
         date_day = date.day
         date_hour = date.hour
         date_minute = date.minute
-        date_weekday = date.weekday
+        date_weekday = date.weekday()
 
         return date_year, date_month, date_day, date_hour, date_minute, date_weekday
 
@@ -205,6 +206,15 @@ class Db2:
         self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
         self.columns = "(hashed, task_name, effort, year, month, day, hour, minute, weekday)"
+        self.weekdict = {
+            0: "Mon",
+            1: "Tue",
+            2: "Wed",
+            3: "Thu",
+            4: "Fri",
+            5: "Sat",
+            6: "Sun",
+        }
 
         # Table : tasks
         self.table_name = 'tasks'
@@ -377,33 +387,9 @@ class Model:
         """
         Add new entry to database
         """
-        # Conditions for a valid entry insertation
-        entry_not_exist = not self.database.entry_exist(name)
-        entry_name_not_empty = not self.entry_empty(name)
-
-        # Check if entry is valid based on previous conditions
-        if entry_not_exist and entry_name_not_empty:
-            entry = Entry()
-            entry.set_name(name=name)
-            self.database.insert_entry(entry=entry)
-
-            # Update task_entry combobox with newly added query
-            self.controller.update_task_entry_combobox()
-
-            msg = "New entry has been added."
-            title = message_box_title[2]
-
-        # Display error messages in case entry is invalid
-        else:
-            if not entry_name_not_empty:
-                msg = "Cannot add entry. Entry cannot be left empty!"
-
-            if not entry_not_exist:
-                msg = "Cannot add entry. Entry already exists!"
-
-            title = message_box_title[0]
-
-        self.controller.display_message(title=title, message=msg)  # Display message
+        entry = Entry()
+        entry.set_name(name=name)
+        self.database.insert_entry(entry=entry)
 
     def update_database_effort(self, task_name, effort):
         """
@@ -662,6 +648,7 @@ class Controller:
             else:
                 msg = 'Counter fails to start!'
 
+            # Message box is displayed only in the case of error
             title = message_box_title[0]
             self.display_message(title=title, message=msg)
 
@@ -697,16 +684,42 @@ class Controller:
         """
         Add entry to database by calling Model's method
         """
-        self.model.add_entry_to_database(name)
-        msg = print_info(f"Task < {name} > has been added to database.")
-        self.logger.write_log(msg=msg)
+        # Conditions for a valid entry insertation
+        entry_not_exist = not self.model.entry_exist(name)
+        entry_name_not_empty = not self.model.entry_empty(name)
+
+        # Check if entry is valid based on previous conditions
+        if entry_not_exist and entry_name_not_empty:
+            self.model.add_entry_to_database(name)
+
+            # Update task_entry combobox with newly added query
+            self.update_task_entry_combobox()
+
+            # msg = "New entry has been added."
+            msg = f"Task <{name}> has been added to database."
+            msg_log = print_info(msg)
+            self.logger.write_log(msg=msg_log)
+            title = message_box_title[2]
+
+        # Display error messages in case entry is invalid
+        else:
+            if not entry_name_not_empty:
+                msg = "Cannot add entry. Entry cannot be left empty!"
+
+            if not entry_not_exist:
+                msg = "Cannot add entry. Entry already exists!"
+
+            title = message_box_title[0]
+
+        # Message box is displayed in both cases
+        self.display_message(title=title, message=msg)  # Display message
+
 
     def update_task_entry_combobox(self):
         """
         Update items in task combobox with data from database
         """
         combobox_items_tuple = tuple(self.model.get_entries_names())
-        print(type(combobox_items_tuple))
         self.view.set_combobox(combobox_items_tuple)
 
     def refresh_application(self, timer):

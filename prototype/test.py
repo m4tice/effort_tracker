@@ -1,4 +1,5 @@
 """Test module"""
 from datetime import datetime
 
-print(type(datetime.now()))
+ct = datetime.now()
+print(ct.weekday())

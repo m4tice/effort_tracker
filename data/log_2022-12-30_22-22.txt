@@ -1,8 +1,0 @@
-[INFO]: Model is connected.
-[INFO]: View is connected.
-[INFO]: Application is connected.
-[INFO]: Task <  > has been added to database.
-[INFO]: Task < Tuan > has been added to database.
-[INFO]: Timer started at 0000:00:53
-[INFO]: Timer stopped at: 0000:01:14
-END OF LOG.
