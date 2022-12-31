@@ -138,7 +138,7 @@ class Counter:
         self.controller = controller
 
 
-class Entry:
+class Entry: # pylint: disable=too-many-instance-attributes
     """
     Entry class used as entry for database
     """
