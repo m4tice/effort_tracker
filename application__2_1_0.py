@@ -4,6 +4,8 @@ import os
 import time
 import sqlite3
 import hashlib
+import csv
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
@@ -58,6 +60,62 @@ def log_msg(msg: str):
     create message for log
     """
     return f"[INFO]: {msg}"
+
+
+class ExportJob:
+    """
+    Export database to csv
+    """
+    def __init__(self) -> None:
+        self.data = None
+        self.weekdict = {
+            0: "Mon",
+            1: "Tue",
+            2: "Wed",
+            3: "Thu",
+            4: "Fri",
+            5: "Sat",
+            6: "Sun",
+        }
+
+        self.csv_path = "./exports"
+
+        if not os.path.isdir(self.csv_path):
+            os.makedirs(self.csv_path)
+
+    def set_data(self, data):
+        """
+        Set data
+        """
+        self.data = data
+
+    def export_csv(self):
+        """
+        Export data to csv
+        """
+        export_time = datetime.now()
+        export_time_year = export_time.year
+        export_time_month = export_time.month
+        export_time_day = export_time.day
+        export_time_hour = export_time.hour
+        export_time_minute = export_time.minute
+        export_time_weekday = self.weekdict[export_time.weekday()]
+
+        csv_file_name = f"database_{export_time_year}_{export_time_month}_{export_time_day}__{export_time_hour}_{export_time_minute}_{export_time_weekday}.csv"  # pylint: disable = "line-too-long"
+        csv_file_full_path = os.path.join(self.csv_path, csv_file_name)
+
+        print(csv_file_full_path)
+
+        with open(csv_file_full_path, 'a', encoding='utf-8', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(self.data)
+
+    def extract_entry_info(self, entry):
+        """
+        extract entry info
+        """
+        _, task, effort, year, month, day, hour, minute, weekday = entry
+        return task, effort, year, month, day, hour, minute, weekday
 
 
 class Counter:
@@ -148,6 +206,15 @@ class Entry: # pylint: disable=too-many-instance-attributes
         self.effort = 0
 
         self.date = datetime.now()
+        self.weekdict = {
+            0: "Mon",
+            1: "Tue",
+            2: "Wed",
+            3: "Thu",
+            4: "Fri",
+            5: "Sat",
+            6: "Sun",
+        }
         self.year, self.month, self.day, self.hour, self.minute, self.weekday = self.extract_date_info(date=self.date)  # pylint: disable=line-too-long
 
     def set_name(self, name: str):
@@ -178,7 +245,7 @@ class Entry: # pylint: disable=too-many-instance-attributes
         date_day = date.day
         date_hour = date.hour
         date_minute = date.minute
-        date_weekday = date.weekday()
+        date_weekday = self.weekdict[date.weekday()]
 
         return date_year, date_month, date_day, date_hour, date_minute, date_weekday
 
@@ -206,15 +273,6 @@ class Db2:
         self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
         self.columns = "(hashed, task_name, effort, year, month, day, hour, minute, weekday)"
-        self.weekdict = {
-            0: "Mon",
-            1: "Tue",
-            2: "Wed",
-            3: "Thu",
-            4: "Fri",
-            5: "Sat",
-            6: "Sun",
-        }
 
         # Table : tasks
         self.table_name = 'tasks'
@@ -302,6 +360,16 @@ class Db2:
         result = self.result2list(result)
 
         return set(result)
+
+    def select_all_without_hashed(self):
+        """
+        Query: gets all entries without hashed names
+        """
+        query = f"SELECT task_name, effort, year, month, day, hour, minute, weekday FROM {self.table_name};"  # pylint: disable=line-too-long
+        result = self.cursor_execute(query=query).fetchall()
+        print(result)
+
+        return result
 
     def select_entry_effort(self, name: str):
         """

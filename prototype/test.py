@@ -1,5 +1,6 @@
 """Test module"""
 from datetime import datetime
 
-ct = datetime.now()
-print(ct.weekday())
+time_label = datetime
+
+time_label.second
