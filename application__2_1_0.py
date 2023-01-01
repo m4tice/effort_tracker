@@ -104,8 +104,6 @@ class ExportJob:
         csv_file_name = f"database_{export_time_year}_{export_time_month}_{export_time_day}__{export_time_hour}_{export_time_minute}_{export_time_weekday}.csv"  # pylint: disable = "line-too-long"
         csv_file_full_path = os.path.join(self.csv_path, csv_file_name)
 
-        print(csv_file_full_path)
-
         with open(csv_file_full_path, 'a', encoding='utf-8', newline='') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(self.data)
@@ -367,7 +365,6 @@ class Db2:
         """
         query = f"SELECT task_name, effort, year, month, day, hour, minute, weekday FROM {self.table_name};"  # pylint: disable=line-too-long
         result = self.cursor_execute(query=query).fetchall()
-        print(result)
 
         return result
 
@@ -497,7 +494,7 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         self.init_timer = render2clock(hours=0, minutes=0, seconds=0)
         self.label_timer_var.set(self.init_timer)
         self.label_timer = ttk.Label(self, textvariable=self.label_timer_var)
-        self.label_timer.grid(row=1, column=2, padx=10)
+        self.label_timer.grid(row=1, column=5, padx=10)
 
         # Button : count
         self.button_count_var = tk.StringVar()
@@ -505,15 +502,15 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
                                         textvariable=self.button_count_var,
                                         command=self.button_count_clicked)
         self.button_count_var.set("Start")
-        self.button_count.grid(row=2, column=2, padx=10)
+        self.button_count.grid(row=2, column=5, padx=10)
 
         # Combobox : task entry
         self.task_entry_var = tk.StringVar()
         self.task_entry = ttk.Combobox(self,
                                         textvariable=self.task_entry_var,
-                                        width=10)
+                                        width=40)
         self.task_entry['values'] = ()
-        self.task_entry.grid(row=1, column=1, padx=10)
+        self.task_entry.grid(row=1, column=1, padx=10, columnspan=4)
         self.task_entry.bind('<<ComboboxSelected>>', self.task_changed)
 
         # Button : add task entry
@@ -523,6 +520,10 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
         self.current_task = None
         self.previous_task = None
         self.first_add_or_change = (self.current_task is None and self.previous_task is None)
+
+        # Button : export db to csv
+        self.button_export = ttk.Button(self, text="Export", command=self.button_export_clicked)
+        self.button_export.grid(row=2, column=4, padx=10)
 
     def set_controller(self, controller):
         """
@@ -607,6 +608,12 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
 
             self.label_timer_var.set(self.controller.get_task_effort_display(self.current_task))
 
+    def button_export_clicked(self):
+        """
+        Export db to csv
+        """
+        self.controller.export_csv()
+
     def display_message(self, title, message):
         """
         Display message box
@@ -669,6 +676,7 @@ class Controller:
         self.counter = None
         self.logger = None
         self.application = None
+        self.csv_exporter = None
 
     def count(self, task_name):
         """
@@ -834,6 +842,12 @@ class Controller:
         """
         self.logger = logger
 
+    def set_exporter(self, csv_exporter: ExportJob):
+        """
+        set exporter
+        """
+        self.csv_exporter = csv_exporter
+
     def get_task_effort(self, task_name):
         """
         Get raw effort (in terms of second) from task
@@ -861,6 +875,13 @@ class Controller:
         """
         self.logger.export_log()
 
+    def export_csv(self):
+        """
+        export db to csv
+        """
+        data = self.model.database.select_all_without_hashed()
+        self.csv_exporter.set_data(data)
+        self.csv_exporter.export_csv()
 
 class Aplication(tk.Tk):
     """
@@ -898,6 +919,9 @@ class Aplication(tk.Tk):
 
         self.logger = Logger()
         self.controller.set_logger(self.logger)
+
+        self.csv_exporter = ExportJob()
+        self.controller.set_exporter(self.csv_exporter)
 
         # MVC
         self.controller.set_model(model=self.model)
