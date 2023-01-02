@@ -488,42 +488,71 @@ class View(ttk.Frame):  # pylint: disable=too-many-ancestors, too-many-instance-
 
         self.controller = None
         self.parent_application = parent_application
+        width=380
+        height=95-5
+        screenwidth = self.parent_application.winfo_screenwidth()
+        screenheight = self.parent_application.winfo_screenheight()
+        alignstr = f'%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)  # pylint: disable=line-too-long, f-string-without-interpolation
+        self.parent_application.geometry(alignstr)
+        self.parent_application.resizable(width=False, height=False)
 
         # Label : timer
         self.label_timer_var = tk.StringVar()
         self.init_timer = render2clock(hours=0, minutes=0, seconds=0)
         self.label_timer_var.set(self.init_timer)
-        self.label_timer = ttk.Label(self, textvariable=self.label_timer_var)
-        self.label_timer.grid(row=1, column=5, padx=10)
+        self.label_timer = tk.Label(self.parent_application, textvariable=self.label_timer_var)
+        # self.label_timer.grid(row=1, column=5, padx=10)
+        self.label_timer.place(x=290,y=15,width=70,height=25)
 
         # Button : count
         self.button_count_var = tk.StringVar()
-        self.button_count = ttk.Button(self,
+        self.button_count = tk.Button(self.parent_application,
                                         textvariable=self.button_count_var,
                                         command=self.button_count_clicked)
         self.button_count_var.set("Start")
-        self.button_count.grid(row=2, column=5, padx=10)
+        # self.button_count.grid(row=2, column=5, padx=10, pady=5)
+        self.button_count.place(x=290, y=50,width=70,height=25)
 
         # Combobox : task entry
         self.task_entry_var = tk.StringVar()
-        self.task_entry = ttk.Combobox(self,
+        self.task_entry = ttk.Combobox(self.parent_application,
                                         textvariable=self.task_entry_var,
-                                        width=40)
+                                        width=35)
         self.task_entry['values'] = ()
-        self.task_entry.grid(row=1, column=1, padx=10, columnspan=4)
+        # self.task_entry.grid(row=1, column=1, padx=10, columnspan=4)
+        self.task_entry.place(x=20, y=15, width=250, height=25)
         self.task_entry.bind('<<ComboboxSelected>>', self.task_changed)
 
         # Button : add task entry
-        self.button_add = ttk.Button(self, text="Add", command=self.button_add_clicked)
-        self.button_add.grid(row=2, column=1, padx=10)
+        self.button_add = tk.Button(
+            self.parent_application,
+            text="Add",
+            command=self.button_add_clicked
+        )
+        # self.button_add.grid(row=2, column=1, padx=10, pady=5)
+        self.button_add.place(x=20, y=50, width=70, height=25)
 
         self.current_task = None
         self.previous_task = None
         self.first_add_or_change = (self.current_task is None and self.previous_task is None)
 
         # Button : export db to csv
-        self.button_export = ttk.Button(self, text="Export", command=self.button_export_clicked)
-        self.button_export.grid(row=2, column=4, padx=10)
+        self.button_export = tk.Button(
+            self.parent_application,
+            text="Export",
+            command=self.button_export_clicked
+        )
+        # self.button_export.grid(row=2, column=2, padx=10, pady=5)
+        self.button_export.place(x=110, y=50, width=70, height=25)
+
+        # ButtonClone : For design measurement
+        # self.button_export = tk.Button(
+        #     self.parent_application,
+        #     text="Clone",
+        #     command=self.button_export_clicked
+        # )
+        # # self.button_export.grid(row=2, column=2, padx=10, pady=5)
+        # self.button_export.place(x=200, y=50, width=70, height=25)
 
     def set_controller(self, controller):
         """
@@ -901,8 +930,8 @@ class Aplication(tk.Tk):
         self.view = View(self)
         # View : Window's setting initialization
         self.title("Prototype")
-        self.view.grid(row=0, column=0, padx=10, pady=10)
-        self.resizable(0, 0)
+        # self.view.grid(row=0, column=0, padx=10, pady=10)
+        # self.resizable(0, 0)
 
         # Controller
         self.controller = Controller(self)
