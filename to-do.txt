@@ -4,12 +4,12 @@
 
 [x] 2. Change logging function accordingly
 
-[ ] 3. Export to csv
+[x] 3. Export to csv
 
 [ ] 4. Change GUI using customtkinters
 
-[ ] 5. Extend task_entry width
+[x] 5. Extend task_entry width
 
 [ ] 6. Baseline functionality for database
 
-[ ] 7. Add columns: {year, month, day, weekday} to database
+[x] 7. Add columns: {year, month, day, weekday} to database
