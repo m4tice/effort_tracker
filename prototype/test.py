@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import tkinter as tk
 import tkinter.font as tkFont
 
