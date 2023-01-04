@@ -1,3 +1,4 @@
+# pylint: skip-file
 """Version: EF_2.0.1"""  # pylint: disable = too-many-lines
 
 import os
@@ -118,7 +119,7 @@ class ExportJob:
         _, task, effort, year, month, day, hour, minute, weekday = entry
         return task, effort, year, month, day, hour, minute, weekday
 
-    def update_visualizer(self):
+    def update_visualizer(self):  # pylint: disable=too-many-locals
         """
         Update effort visualizer
         """
