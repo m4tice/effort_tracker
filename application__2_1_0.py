@@ -1,4 +1,4 @@
-"""Version: EF_2.0.1"""
+"""Version: EF_2.0.1"""  # pylint: disable = too-many-lines
 
 import os
 import time
@@ -11,6 +11,8 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 from datetime import datetime
 
+import pandas as pd
+import numpy as np
 
 message_box_title = ('Error', 'Warning', 'Info')
 
@@ -79,6 +81,7 @@ class ExportJob:
         }
 
         self.csv_path = "./exports"
+        self.excel_visualizer = "./efforts.csv"
 
         if not os.path.isdir(self.csv_path):
             os.makedirs(self.csv_path)
@@ -114,6 +117,94 @@ class ExportJob:
         """
         _, task, effort, year, month, day, hour, minute, weekday = entry
         return task, effort, year, month, day, hour, minute, weekday
+
+    def update_visualizer(self):
+        """
+        Update effort visualizer
+        """
+        # Set path
+        csv_files = os.listdir(self.csv_path)
+
+        # available csv files
+        for file in csv_files:
+            print(file)
+        latest_csv = csv_files[-1]
+        print(f"Updated from: {latest_csv}")
+
+        # create headers for input dataframe
+        headers = ['name', 'effort', 'year', 'month', 'day', 'hour', 'minute', 'weekday']
+
+        # load input dataframe
+        input_df = pd.read_csv(os.path.join(self.csv_path, latest_csv), names=headers)
+
+        # extract information from input dataframe
+        date_labels = []
+        unique_dates = self.extract_unique_date(input_df, date_labels=date_labels)
+        unique_names = self.extract_unique_task(input_df)
+
+        # new dataframe
+        dfv_array = np.zeros([len(unique_names), len(unique_dates)], dtype=int)
+        dfv = pd.DataFrame(dfv_array, columns=unique_dates)
+
+        # set names as index column
+        dfv['names'] = list(unique_names)
+        dfv.set_index('names', inplace=True)
+        print(dfv)
+
+        for _, row in input_df.iterrows():
+            name = row['name']
+            effort = row['effort']
+            date_label = self.get_date_label(row)
+
+            self.set_effort(effort=effort, name=name, date=date_label, dataframe=dfv)
+
+        export_time = datetime.now()
+        export_time_year = export_time.year
+        export_time_month = export_time.month
+        export_time_day = export_time.day
+        export_time_hour = export_time.hour
+        export_time_minute = export_time.minute
+        export_time_weekday = self.weekdict[export_time.weekday()]
+
+        csv_file_name = f"{self.excel_visualizer}_{export_time_year}_{export_time_month}_{export_time_day}__{export_time_hour}_{export_time_minute}_{export_time_weekday}.csv"  # pylint: disable = "line-too-long"
+
+        dfv.to_csv(csv_file_name)
+
+    def get_date_label(self, row):
+        """
+        Get date label
+        """
+        month = row['hour']
+        day = row['minute']
+        weekday = row['weekday']
+
+        date_label = f"{weekday} {month}/{day}"
+
+        return date_label
+
+    def extract_unique_date(self, dataframe: pd.DataFrame, date_labels: list):
+        """
+        Get unique dates
+        """
+        for _, row in dataframe.iterrows():
+            date_label = self.get_date_label(row=row)
+            date_labels.append(date_label)
+
+        return sorted(set(date_labels))
+
+    def extract_unique_task(self, dataframe: pd.DataFrame):
+        """
+        Get unique names
+        """
+        names = dataframe['name']
+
+        return sorted(set(names))
+
+    def set_effort(self, effort: int, name: str, date: str, dataframe: pd.DataFrame):
+        """
+        set effort
+        """
+        dataframe.loc[str(name)][str(date)] += effort
 
 
 class Counter:
@@ -267,7 +358,7 @@ class Db2:
     def __init__(self) -> None:
 
         # connecting to database
-        self.database_name = 'prototype.db'
+        self.database_name = 'efforts.db'
         self.connection = sqlite3.connect(self.database_name)
         self.cursor = self.connection.cursor()
         self.columns = "(hashed, task_name, effort, year, month, day, hour, minute, weekday)"
@@ -911,6 +1002,7 @@ class Controller:
         data = self.model.database.select_all_without_hashed()
         self.csv_exporter.set_data(data)
         self.csv_exporter.export_csv()
+        self.csv_exporter.update_visualizer()
 
 class Aplication(tk.Tk):
     """

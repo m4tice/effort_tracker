@@ -1,0 +1,5 @@
+[INFO]: Model is connected.
+[INFO]: View is connected.
+[INFO]: Application is connected.
+[INFO]: Selected: Tuan
+END OF LOG.
