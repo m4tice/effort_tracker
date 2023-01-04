@@ -247,7 +247,7 @@ class Counter:
             self.set_timer()
             self.controller.refresh_application(str(self.timer))
 
-            time.sleep(0.1)
+            time.sleep(1)
             self.time += 1
 
     def stop(self)->int:
